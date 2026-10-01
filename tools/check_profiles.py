@@ -96,7 +96,7 @@ def application(fields, key, value):
             raise Refused(f"architecture {value!r}")
         fields[key] = value.lower()
     elif key == "graphics":
-        if value.lower() not in ("auto", "gdi", "dxvk"):
+        if value.lower() not in ("auto", "gdi", "dxvk", "opengl"):
             raise Refused(f"graphics {value!r}")
         fields[key] = value.lower()
     else:

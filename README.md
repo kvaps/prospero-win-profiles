@@ -29,6 +29,18 @@ at about 85–93% of native speed on the console. Their output arrives in the ti
 stream as `STDOUT` lines, and each program exits by itself, which returns
 the title to the launcher.
 
+## Graphics modes
+
+The profile checker accepts `graphics = auto`, `gdi`, `dxvk` or `opengl`.
+`opengl` requires a prospero-win runtime built with the optional PS5 OpenGL
+SDK. The runtime forces Wine's builtin `opengl32` for that profile, preserving
+any other per-game DLL overrides. SDK 0.6.0 provides an EGL compatibility
+profile and OpenGL 4.6 Core; Wine's legacy `wglCreateContext` path uses the
+compatibility default so games can call fixed-function APIs. The upstream
+compatibility-context gate covers legacy `QUADS` and related draws, but no
+Windows WGL game has been validated on hardware yet. Half-Life 1, Doom ports
+and other individual games remain unverified.
+
 ## Install
 
 The library lives in `/data/prospero-win` on the console:
@@ -70,7 +82,7 @@ python3 tools/pw_prefix.py push warcraft-iii-reign-of-chaos --library ~/prospero
 
 | Recipe | Notes |
 |---|---|
-| `warcraft-iii-reign-of-chaos` | Blizzard's 1.27a installer (it shows its license through Wine Gecko); registers `blizzard.ax`, and LAV Filters (`winetricks lavfilters`) for the cinematics, since the console's Wine has no GStreamer; RenderEdge_Widescreen (pinned by SHA-256) for 16:9; Direct3D 9 through DXVK instead of lutris.net's `-opengl`, since the console has no OpenGL; 1920x1080, the console desktop's size |
+| `warcraft-iii-reign-of-chaos` | Blizzard's 1.27a installer (it shows its license through Wine Gecko); registers `blizzard.ax`, and LAV Filters (`winetricks lavfilters`) for the cinematics, since the console's Wine has no GStreamer; RenderEdge_Widescreen (pinned by SHA-256) for 16:9; Direct3D 9 through DXVK because that route has been exercised on-console while the new WGL route remains unvalidated; 1920x1080, the console desktop's size |
 
 ## Benchmark sources
 

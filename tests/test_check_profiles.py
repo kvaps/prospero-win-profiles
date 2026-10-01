@@ -52,6 +52,7 @@ class ProfileRules(unittest.TestCase):
             (edit("preset = pinball", "preset = Pin"), False),
             (edit("graphics = gdi", "graphics = gdi\ngraphics = gdi"), False),
             (edit("graphics = gdi", "graphics = DXVK"), True),
+            (edit("graphics = gdi", "graphics = OPENGL"), True),
             (edit("name = Space Cadet Pinball\n", ""), False),
             (edit("prefix = default", "prefix = default\narguments ="), True),
             (edit("prefix = default", "prefix = default\nstartup_command_id = 65536"), False),
