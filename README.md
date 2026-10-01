@@ -44,6 +44,9 @@ compatibility-context gate covers legacy `QUADS` and related draws. OpenArena
 0.8.8 and Half-Life 1 have been validated on the PS5; other games and Doom
 ports still need individual checks. Both OpenGL profiles set `show_fps = true`
 for the backend's small frame-rate counter without the statistics chart.
+Half-Life and Counter-Strike also set `opengl_thread = true`, which runs the
+game's OpenGL work on its own CPU core beside the game; it needs a
+prospero-win runtime that knows the setting (older ones refuse the profile).
 
 ## Install
 

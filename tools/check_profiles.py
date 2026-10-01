@@ -157,6 +157,12 @@ def display_line(seen, key, value):
     elif key == "show_fps":
         if value.lower() not in ("true", "false"):
             raise Refused(f"show_fps {value!r}")
+    elif key == "refresh":
+        if value not in ("60", "120"):
+            raise Refused(f"refresh {value!r}")
+    elif key == "opengl_thread":
+        if value.lower() not in ("true", "false"):
+            raise Refused(f"opengl_thread {value!r}")
     else:
         raise Refused(f"unknown [display] key {key!r}")
 
