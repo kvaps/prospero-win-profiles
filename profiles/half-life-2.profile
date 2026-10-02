@@ -10,14 +10,16 @@
 ; - Put DXVK 2.6.2's 32-bit DLLs (the release's x32 folder) in that prefix's
 ;   C:\windows\syswow64. Don't add a dxvk.conf: the default settings are the
 ;   tested ones.
-; - The game starts at its menu. The first map takes about a minute and a
-;   half to load on the console.
+; - The game starts at its menu. A map takes about 25 seconds to load on
+;   the console.
 ;
-; Needs a prospero-win runtime with Wine patch 0730 (prospero-win #289).
-; Without it, loading the first map freezes, and closing the game leaves
-; the console stuck on "Closing..." until it is restarted: 32-bit DXVK keeps
-; textures in 64 MiB Windows file mappings that older runtimes wrote to the
-; console's storage.
+; Needs a prospero-win runtime with Wine patch 0730 (prospero-win #289) and
+; the WoW64 CPU backend from prospero-win #296. 32-bit DXVK keeps textures in
+; 64 MiB Windows file mappings and maps and unmaps windows of them thousands
+; of times while a map loads. Without #289, loading the first map freezes and
+; closing the game leaves the console stuck on "Closing..." until it is
+; restarted; without #296, a map takes about 95 seconds to load and the frame
+; rate drops while new textures appear.
 [application]
 id = half-life-2
 name = Half-Life 2
