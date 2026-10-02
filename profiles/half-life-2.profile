@@ -20,6 +20,14 @@
 ; closing the game leaves the console stuck on "Closing..." until it is
 ; restarted; without #296, a map takes about 95 seconds to load and the frame
 ; rate drops while new textures appear.
+;
+; For a steady 60 fps the runtime also needs prospero-win #312 and #316
+; (October 2026). Without them the game plays at 60 fps but, a couple of
+; minutes into the train station, falls to between 1 and 15 fps for up to a
+; few minutes, then recovers on its own; with #312 alone it holds 60 with
+; brief dips to about 53. With both, an automated run from the train to
+; Kleiner's call holds 60 fps throughout. The menu's mouse cursor needs
+; prospero-win #305.
 [application]
 id = half-life-2
 name = Half-Life 2
