@@ -28,6 +28,12 @@
 ; brief dips to about 53. With both, an automated run from the train to
 ; Kleiner's call holds 60 fps throughout. The menu's mouse cursor needs
 ; prospero-win #305.
+;
+; Tested settings (Options > Video > Advanced): High texture, model and
+; water detail (reflect all), high shadows, 4x MSAA, 16x anisotropic
+; filtering and full HDR. With them the game holds 60 fps, the console's
+; refresh rate, from the train to the canals, and plays with the DualSense or
+; a keyboard and mouse.
 [application]
 id = half-life-2
 name = Half-Life 2
