@@ -1,0 +1,81 @@
+# Grand Theft Auto IV: The Complete Edition (1.2.0.59) for Prospero Win, in
+# Lutris's installer format. Tested on the PS5: the open city plays at
+# roughly 54 to 55 fps at 1920x1080 and 60 Hz (see profiles/gtaiv.profile).
+#
+# There is no installer to run: the game comes from your installed copy of
+# the Complete Edition (Steam or the Rockstar Games Launcher, on Windows or
+# under Wine). Give the recipe its GTAIV folder, the one holding GTAIV.exe,
+# common, pc, TLAD and TBoGT; it is copied into C:\Games\GTAIV of a prefix
+# of its own. The episodes come with it and need nothing else.
+#
+# The profile starts GTAIV.exe directly: PlayGTAIV.exe is a 64-bit stub that
+# hands over to the Rockstar Games Launcher, which starts GTAIV.exe as a
+# second process, and Wine on the console does not start other processes.
+#
+# Mods are optional and not installed here; the README explains how to add
+# the Ultimate ASI Loader and FusionFix to the prefix this recipe makes.
+name: "Grand Theft Auto IV: The Complete Edition"
+game_slug: gtaiv
+version: Complete Edition 1.2.0.59 (Prospero Win)
+slug: gtaiv-complete-edition-prospero-win
+runner: wine
+prospero:
+  name: Grand Theft Auto IV
+  graphics: dxvk
+  display: {desktop: 1920x1080}
+  input: {mode: xinput}
+script:
+  game:
+    exe: drive_c/Games/GTAIV/GTAIV.exe
+    prefix: $GAMEDIR
+    # The same options as commandline.txt below, so the game gets them
+    # whichever it reads.
+    args: -availablevidmem 1536 -nomemrestrict -norestrictions -width 1920 -height 1080 -refreshrate 60 -fullscreen -rglLanguage en-US
+  files:
+  - game: "N/A:Select the GTAIV folder of your installed Grand Theft Auto IV: The Complete Edition (it holds GTAIV.exe)"
+  wine:
+    dxvk: true
+    dxvk_version: "2.6.2"
+    overrides:
+      # Native first, so the Ultimate ASI Loader loads if you add it (it
+      # ships as dinput8.dll); Wine's own dinput8 otherwise.
+      dinput8: n,b
+  installer:
+  - task: {name: create_prefix, prefix: $GAMEDIR, arch: win32}
+  - copy: {src: game, dst: $GAMEDIR/drive_c/Games/GTAIV}
+  # Where the game is installed, as Steam's installer for the Complete
+  # Edition writes it (installscript.vdf in the game's folder). GTAIV.exe
+  # doesn't read this key itself; tools that look for the game do. Both
+  # registry views, since a 32-bit program sees the Wow6432Node one.
+  - task:
+      name: set_regedit
+      path: HKEY_LOCAL_MACHINE\SOFTWARE\Rockstar Games\Grand Theft Auto IV
+      key: InstallFolder
+      value: C:\Games\GTAIV
+  - task:
+      name: set_regedit
+      path: HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Rockstar Games\Grand Theft Auto IV
+      key: InstallFolder
+      value: C:\Games\GTAIV
+  # The game adds the options in commandline.txt, in its own folder, to its
+  # command line. Every option here is one GTAIV.exe 1.2.0.59 defines.
+  # -availablevidmem sets the video memory the game assumes it has, in MB,
+  # instead of the amount it detects; -nomemrestrict lifts its limit on
+  # memory for managed resources; -norestrictions unlocks graphics settings
+  # it would otherwise cap. 1536 MB is the value tested on the console. The
+  # size and refresh rate are the console's.
+  # -rglLanguage takes the codes the Rockstar Games Launcher passes (en-US,
+  # fr-FR, de-DE, it-IT, es-ES, ru-RU, ja-JP...); without it the game follows
+  # the system's language. No frame limiter: the console presents at 60 Hz
+  # with vsync.
+  - write_file:
+      file: $GAMEDIR/drive_c/Games/GTAIV/commandline.txt
+      content: |
+        -availablevidmem 1536
+        -nomemrestrict
+        -norestrictions
+        -width 1920
+        -height 1080
+        -refreshrate 60
+        -fullscreen
+        -rglLanguage en-US

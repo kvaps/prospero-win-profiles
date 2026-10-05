@@ -18,6 +18,7 @@ benchmark programs from their pinned upstream sources.
 | `half-life` | Half-Life 1 (your own copy in `C:\Games\HalfLife`) | PE32, OpenGL | 2026-10-01: `c1a0` scene and audio on the PS5; USB keyboard and mouse for input |
 | `counter-strike-16` | Counter-Strike 1.6 (your own copy in `C:\Games\CounterStrike16`, plus winetricks `corefonts`; see the profile's comments) | PE32, OpenGL | 2026-10-01: main menu at 1920x1080 with the core fonts, 60 fps with vsync; USB keyboard and mouse |
 | `half-life-2` | Half-Life 2 (your own copy in `C:\Games\HalfLife2` of its own prefix, with DXVK 2.6.2; see the profile's comments) | PE32, Direct3D 9 | 2026-10-02: `d1_trainstation_01` and `d1_canals_01` load in about 25 s and render; a 91 s recorded train-station demo plays at 59.7 fps on average, never under 56; keyboard checked (flashlight, pause menu); needs prospero-win #289 and #296. Mouse and DualSense not yet checked |
+| `gtaiv` | Grand Theft Auto IV: The Complete Edition 1.2.0.59 (your own copy in `C:\Games\GTAIV` of its own prefix, with DXVK 2.6.2; installed from `recipes/`) | PE32, Direct3D 9 | 2026-10: the open city at 1920x1080 and 60 Hz runs at roughly 54–55 fps, close to 59 on quiet streets and in the mid-40s in fights and crowds; about 90–95 s of loading to get into the game; DualSense. FusionFix works as an optional mod (see below) |
 | `sevenzip-bench` | 7-Zip 25.01 benchmark, `7za b -mmt1 -md22` | PE32 | 2026-09-28: 3361–3369 total MIPS |
 | `nbench-x87` | nbench (BYTEmark 2.2.3), x87 build | PE32 | 2026-09-28: all ten tests; integer index 166.7, FP index 81.6 |
 | `pi-x87` | Ooura's `pi_fftca`, 4.2M digits, x87 build | PE32 | 2026-09-28: 13 s, digits written to `pi.dat` |
@@ -93,6 +94,52 @@ python3 tools/pw_prefix.py push warcraft-iii-reign-of-chaos --library ~/prospero
 | Recipe | Notes |
 |---|---|
 | `warcraft-iii-reign-of-chaos` | Blizzard's 1.27a installer (it shows its license through Wine Gecko); registers `blizzard.ax`, and LAV Filters (`winetricks lavfilters`) for the cinematics, since the console's Wine has no GStreamer; RenderEdge_Widescreen (pinned by SHA-256) for 16:9; Direct3D 9 through DXVK because that route has been exercised on-console while the new WGL route remains unvalidated; 1920x1080, the console desktop's size |
+| `gtaiv` | No installer: give it the GTAIV folder of your installed Complete Edition (`--file game=<that folder>`). Copies it to `C:\Games\GTAIV`, records the install folder in the registry, installs DXVK 2.6.2, and writes a `commandline.txt` with the profile's options (video memory limits lifted, 1920x1080 at 60 Hz, fullscreen, English) |
+
+### Grand Theft Auto IV: settings and optional mods
+
+The game keeps its graphics settings in
+`C:\users\prospero\AppData\Local\Rockstar Games\GTA IV\Settings\SETTINGS.CFG`.
+On the console, Wine runs as a user called `prospero`, so the game looks for
+that folder rather than one named after you. The recipe makes the prefix as
+that user already. If you set up a prefix by hand on your PC instead,
+`pw_prefix.py push` creates the `C:\users\prospero` folders when they are
+missing (prospero-win #348 and later), and you can copy your own
+`SETTINGS.CFG` there.
+
+Neither mod below is needed to play, and the recipe doesn't install them.
+
+- **[Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader)**
+  is what loads plugins (`.asi` files) into the game. It goes in the game's
+  folder as `dinput8.dll`; the profile's `dinput8=n,b` override makes Wine
+  use it when it is there, and changes nothing when it isn't. FusionFix's
+  release includes it.
+- **[FusionFix](https://github.com/ThirteenAG/GTAIV.EFLC.FusionFix)**
+  fixes many of the PC version's bugs and adds options of its own. Version
+  5.1.1 was tested. Unpack its release archive into the game's folder, then:
+  1. Install Microsoft's D3DX9 and shader compiler DLLs in the prefix with
+     [winetricks](https://github.com/Winetricks/winetricks), which takes
+     them from Microsoft's DirectX June 2010 redistributable:
+     `WINEPREFIX=<your library>/prefixes/gtaiv winetricks d3dx9_43 d3dcompiler_43`.
+     Without them, the game hangs at the end of loading: FusionFix assembles
+     its shaders with `D3DXAssembleShader`, and Wine's own version can't
+     read them.
+  2. Add `d3dx9_43,d3dcompiler_43=n` to the profile's `dll_overrides`, so it
+     reads
+     `d3d8,d3d9,d3d10core,d3d11,dxgi=n;dinput8=n,b;d3dx9_43,d3dcompiler_43=n`.
+
+  FusionFix costs frame rate on the console. In a side-by-side test in the
+  city on the same build, with its default settings, the game ran at 25.8 fps
+  with it and 33.3 fps without it, about 22% slower. The cost comes with its defaults, not
+  from its optional extra shadows. FusionFix adds its own options to the
+  game's settings menu, so you can tune it and trade some of its effects for
+  speed.
+
+Microsoft's DLLs and the game's files are never part of this repository;
+winetricks downloads the redistributable from Microsoft.
+
+The test runs used a small god-mode plugin of our own so long drives weren't
+cut short. It isn't needed and isn't published.
 
 ## Benchmark sources
 
