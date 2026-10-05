@@ -128,12 +128,40 @@ Neither mod below is needed to play, and the recipe doesn't install them.
      reads
      `d3d8,d3d9,d3d10core,d3d11,dxgi=n;dinput8=n,b;d3dx9_43,d3dcompiler_43=n`.
 
-  FusionFix costs frame rate on the console. In a side-by-side test in the
-  city on the same build, with its default settings, the game ran at 25.8 fps
-  with it and 33.3 fps without it, about 22% slower. The cost comes with its defaults, not
-  from its optional extra shadows. FusionFix adds its own options to the
-  game's settings menu, so you can tune it and trade some of its effects for
-  speed.
+  3. If you keep FusionFix, add a `.pw-symlinks` file in its `update` folder
+     (`C:\Games\GTAIV\update`) with this one line, a tab between the two
+     names:
+
+     ```
+     socialclub_LOG.txt	/dev/null
+     ```
+
+     The Ultimate ASI Loader that comes with FusionFix checks `update\` for
+     every file the game opens before it opens the real one. The Social Club
+     log is opened over and over while you play, and prospero-win already
+     sends the copy in the game's own folder to `/dev/null`. This line gives
+     the check a matching link, so it finds one instead of searching the
+     folder each time.
+
+  **We play without FusionFix for now, because it costs a lot of frame rate
+  on the console.** These are measured on the PS5:
+
+  - In a side-by-side test in the city on the same build, with FusionFix's
+    default settings, the game ran at 25.8 fps with it and 33.3 fps without
+    it, about 22% slower.
+  - Driving the same daytime save on prospero-win from October 2026, with
+    the link above and prospero-win #370, which makes missed file lookups
+    cheaper, the game averaged about 40 fps with FusionFix. Without it, the
+    open city runs at 54–55 fps in our usual test drive. That is a different
+    route, so take the gap as rough.
+
+  Most of what remains comes from FusionFix's code hooks in the game's
+  per-object work on the main and render threads, and none of its menu
+  options turn those off. Turning its effects down in the menu helps only
+  a little. To go back to the plain game, take FusionFix's `d3d9.dll`,
+  `vulkan.dll`, `update` folder and `plugins\GTAIV.EFLC.FusionFix.*` files
+  out of the game's folder and remove `;d3dx9_43,d3dcompiler_43=n` from the
+  profile again.
 
 Microsoft's DLLs and the game's files are never part of this repository;
 winetricks downloads the redistributable from Microsoft.
