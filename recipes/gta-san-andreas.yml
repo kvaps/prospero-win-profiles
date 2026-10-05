@@ -1,0 +1,123 @@
+# Grand Theft Auto: San Andreas (PC version 1.0) for Prospero Win, in
+# Lutris's installer format. Tested on the PS5: 60 fps at 1920x1080 with the
+# DualSense (see profiles/gta-san-andreas.profile), on a prospero-win runtime
+# with #373 and #374.
+#
+# There is no installer to run: the game comes from your own installed copy.
+# Give the recipe the folder that holds gta_sa.exe; it is copied into
+# C:\Games\GTASA of a prefix of its own. It has to be version 1.0 (the mods
+# below need it): gta_sa.exe 1.0 is 14,383,616 bytes. The Steam and Rockstar
+# Games Launcher releases are newer and need downgrading first.
+#
+# Mods, all loaded as plugins from the game's scripts folder:
+# - GInput: San Andreas reads gamepads only through DirectInput, which the
+#   DualSense doesn't appear as on the console. GInput replaces the game's pad
+#   code with XInput, which it does, and adds rumble and PlayStation button
+#   prompts.
+# - SilentPatch fixes many of the game's own bugs, among them the ones that
+#   show above 30 fps.
+# - The Widescreen Fix draws the HUD, menus and camera for 16:9, and starts
+#   the game at the desktop's resolution (the console's 1920x1080) instead of
+#   800x600, so there is no resolution to pick.
+# - Framerate Vigilante fixes what still breaks above 30 fps (driving,
+#   swimming, helicopters, some missions) and holds the game at 60. Its only
+#   download is on MixMods (mixmods.com.br, "Framerate Vigilante"), behind a
+#   browser check, so download Framerate_Vigilante.zip there and give it to
+#   the recipe. It wants the game's own frame limiter left on (the default).
+# - The Widescreen Frontend replaces the loading screens (models/txd/
+#   LOADSCS.txd) with 16:9 ones.
+# - The Open Limit Adjuster raises the game's object and streaming limits,
+#   which larger mods need.
+# The Ultimate ASI Loader loads them: it takes the place of vorbisFile.dll,
+# which the game loads at start, and passes the real one's calls on to it
+# under the name vorbisHooked.dll.
+#
+# The intro movies play through DirectShow. Wine's own MPEG splitter needs
+# GStreamer, which the console's Wine doesn't have, and without a working
+# one the game waits on the first movie forever. LAV Filters are Windows
+# DirectShow filters and play them on the console as they do Warcraft III's
+# cinematics.
+name: "Grand Theft Auto: San Andreas"
+game_slug: gta-san-andreas
+version: PC 1.0 (Prospero Win)
+slug: gta-san-andreas-prospero-win
+runner: wine
+prospero:
+  name: GTA San Andreas
+  graphics: dxvk
+  display: {desktop: 1920x1080, scaling: fit}
+  input: {mode: xinput}
+script:
+  game:
+    exe: drive_c/Games/GTASA/gta_sa.exe
+    prefix: $GAMEDIR
+  files:
+  - game: "N/A:Select the folder of your installed GTA San Andreas 1.0 (it holds gta_sa.exe)"
+  - framerate_vigilante: "N/A:Select Framerate_Vigilante.zip, downloaded from MixMods (the version from 2026-10-01 or later)"
+  # Third-party mods: downloaded, not shipped, and pinned to the releases'
+  # bytes.
+  - asiloader:
+      url: https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/v9.7.4/Ultimate-ASI-Loader.zip
+      filename: Ultimate-ASI-Loader-v9.7.4.zip
+      sha256: 952cebfc30d525afc2bdbaca954329d405ded3aa688a83027354dae14dfd5c5f
+  - silentpatch:
+      url: https://github.com/CookiePLMonster/SilentPatch/releases/download/1.1-BUILD34.1-SA/SilentPatchSA.zip
+      filename: SilentPatchSA-1.1-BUILD34.1.zip
+      sha256: 0837bbdc0548a4a952f924adefd2bb6eacc866407f153844fe1f56995668c42c
+  # GInput 1.11 for San Andreas, from Silent's site (silentsblog.com).
+  - ginput:
+      url: https://silent.rockstarvision.com/uploads/GInputSA.zip
+      filename: GInputSA-1.11.zip
+      sha256: b6d03e3322c61eda3c582dda062f3547dd06b73c3ff8298ee4aaf0d81a9ec201
+  # ThirteenAG publishes the Widescreen Fix as a rolling build under one tag:
+  # when it changes, update the hash (the build pinned here is 2026-10-04's).
+  - widescreenfix:
+      url: https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtasa/GTASA.WidescreenFix.zip
+      filename: GTASA.WidescreenFix-20261004.zip
+      sha256: 563078bfae5ad93be548d9378d4a97809762fb3a8dfdf0ef65e6023beadeb3ae
+  - widescreenfrontend:
+      url: https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtasa/GTASA.WidescreenFrontend.zip
+      filename: GTASA.WidescreenFrontend-20190412.zip
+      sha256: 341262df3eb5688e534d2022432aa753eddacc294b7d8aacf94e0facc3b843ae
+  - limitadjuster:
+      url: https://github.com/GTAmodding/III.VC.SA.LimitAdjuster/releases/download/v1.7.2/III.VC.SA.LimitAdjuster.zip
+      filename: III.VC.SA.LimitAdjuster-v1.7.2.zip
+      sha256: 4795a84d6b1a3c35715ba579d2bbe491daa69ffa17e1b8c350a9265d3190e1c6
+  wine:
+    dxvk: true
+    dxvk_version: "2.6.2"
+  installer:
+  - task: {name: create_prefix, prefix: $GAMEDIR, arch: win32}
+  - copy: {src: game, dst: $GAMEDIR/drive_c/Games/GTASA}
+  - task: {name: winetricks, app: lavfilters, prefix: $GAMEDIR}
+  # The ASI loader as vorbisFile.dll, the real one as vorbisHooked.dll.
+  - move:
+      src: $GAMEDIR/drive_c/Games/GTASA/vorbisFile.dll
+      dst: $GAMEDIR/drive_c/Games/GTASA/vorbisHooked.dll
+  - extract: {file: asiloader, dst: $CACHE/asiloader}
+  - move:
+      src: $CACHE/asiloader/dinput8.dll
+      dst: $GAMEDIR/drive_c/Games/GTASA/vorbisFile.dll
+  - extract: {file: silentpatch, dst: $CACHE/silentpatch}
+  - copy: {src: $CACHE/silentpatch/SilentPatchSA.asi, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - copy: {src: $CACHE/silentpatch/SilentPatchSA.ini, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - extract: {file: ginput, dst: $CACHE/ginput}
+  - copy: {src: $CACHE/ginput/GInputSA.asi, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - copy: {src: $CACHE/ginput/GInputSA.ini, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  # Its zip carries its own copy of the ASI loader; only the plugin is used.
+  - extract: {file: widescreenfix, dst: $CACHE/widescreenfix}
+  - copy: {src: $CACHE/widescreenfix/scripts, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - extract: {file: widescreenfrontend, dst: $GAMEDIR/drive_c/Games/GTASA}
+  - extract: {file: limitadjuster, dst: $CACHE/limitadjuster}
+  - copy: {src: $CACHE/limitadjuster/III.VC.SA.LimitAdjuster.asi, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - copy: {src: $CACHE/limitadjuster/III.VC.SA.LimitAdjuster.ini, dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  - extract: {file: framerate_vigilante, dst: $CACHE/framerate_vigilante}
+  - copy: {src: "$CACHE/framerate_vigilante/GTA SA/FramerateVigilante", dst: $GAMEDIR/drive_c/Games/GTASA/scripts}
+  # The button pictures GInput shows in the game's help boxes.
+  - copy: {src: $CACHE/ginput/models, dst: $GAMEDIR/drive_c/Games/GTASA/models}
+  # PlayStation button prompts (Cross, Circle...) instead of Xbox ones.
+  - write_config:
+      file: $GAMEDIR/drive_c/Games/GTASA/scripts/GInputSA.ini
+      section: GInput
+      key: PlayStationButtons
+      value: 1
