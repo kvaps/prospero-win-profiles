@@ -17,6 +17,9 @@
 ;   Put the same options there as in "arguments" below. The first three stop
 ;   the game from capping its settings to the video memory it detects;
 ;   -rglLanguage en-US picks English whatever the system's language is.
+;   -width and -height keep the game at 1920x1080. Without them you can pick
+;   another resolution in the game's menu; prospero-win #369 and later scale
+;   it to the screen. Lower resolutions didn't make the city faster.
 ;
 ; The game saves its graphics settings in
 ; C:\users\prospero\AppData\Local\Rockstar Games\GTA IV\Settings\SETTINGS.CFG.
@@ -34,8 +37,9 @@
 ; - FusionFix 5.1.1 works, but needs Microsoft's d3dx9_43 and
 ;   d3dcompiler_43 (winetricks d3dx9_43 d3dcompiler_43) and
 ;   d3dx9_43,d3dcompiler_43=n added to dll_overrides; without them the game
-;   hangs at the end of loading. It costs about 22% of the frame rate in the
-;   city with its default settings.
+;   hangs at the end of loading. We play without it for now: even with the
+;   tips in the README, the city runs at about 40 fps with it instead of
+;   54 to 55, and most of that cost can't be switched off in its menu.
 ;
 ; The test runs used a small god-mode plugin of our own to keep long drives
 ; going; it isn't needed and isn't published.
