@@ -15,7 +15,8 @@
 # Needs prospero-win #425 (the Watcom runtime's segment, ENTER and word-stack
 # instructions; without it the game stops with an illegal instruction) and
 # #426 (the d-pad's arrows as the arrow keys DirectInput reads; without it the
-# player stands still in a match). On a console where another loader already
+# player stands still in a match). #428 stops stalls that last until the next
+# button press (DirectInput's message wait spinning). On a console where another loader already
 # shows /data to every app (ShadowMountPlus 1.7beta4, PS5SXHelper's
 # mountroot), no game starts without #423.
 name: Atomic Bomberman
