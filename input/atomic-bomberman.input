@@ -1,7 +1,7 @@
 ; Atomic Bomberman on the DualSense, as the first keyboard player: the d-pad
 ; moves, Cross drops a bomb (Space) and Circle is the action key (Enter: stop
 ; a kicked bomb, punch, set off trigger bombs). Enter also confirms in the
-; menus; Options and Triangle are Escape, to go back. The left stick
+; menus; Options is Escape, to go back. The left stick
 ; moves the pointer and R2/L2 click, for the screens that need the mouse
 ; (the keyboard definitions).
 [input]
@@ -17,6 +17,6 @@ right = right
 cross = space
 circle = enter
 square = space
-triangle = escape
+triangle = enter
 options = escape
 create = escape
