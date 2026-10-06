@@ -1,0 +1,179 @@
+# Atomic Bomberman (Interplay, 1997) for Prospero Win, in Lutris's installer
+# format. Adapted from the lutris.net "CD" script (atomic-bomberman-cd): the
+# CD's setup program is not run, the game's files are copied from the disc to
+# where it would put them, C:\INTRPLAY\BOMBRMAN. The game reads everything
+# from there (cfg.ini points both of its homes at it), so the console needs no
+# CD drive, and it writes no registry keys.
+#
+# Give the CD's root as --disc: a mounted disc, or a .bin/.cue image unpacked
+# (bchunk, then 7z x on the .iso). The file names are matched in either case,
+# since a disc mounted without Joliet shows them in lower case. Checked with
+# the Italian "Sold Out Software" CD; the BM95.EXE patch below is pinned to
+# that build and stops on any other.
+name: Atomic Bomberman
+game_slug: atomic-bomberman
+version: CD (Prospero Win)
+slug: atomic-bomberman-prospero-win
+runner: wine
+prospero:
+  name: Atomic Bomberman
+  # 640x480 in 256 colours through DirectDraw, drawn by cnc-ddraw's GDI
+  # renderer (below).
+  graphics: gdi
+  display: {desktop: 640x480, scaling: fit}
+  input: {preset: atomic-bomberman}
+script:
+  game:
+    exe: drive_c/INTRPLAY/BOMBRMAN/BM95.EXE
+    prefix: $GAMEDIR
+  files:
+  # FunkyFr3sh's cnc-ddraw (MIT), a DirectDraw replacement that turns the
+  # game's 8-bit palettised frames into 32-bit ones itself. Through Wine's
+  # own ddraw the console showed the frames with garbage colours (pink
+  # stripes, then black). Downloaded, not shipped, and pinned to the bytes.
+  - cncddraw:
+      url: https://github.com/FunkyFr3sh/cnc-ddraw/releases/download/v7.1.0.0/cnc-ddraw.zip
+      filename: cnc-ddraw-7.1.0.0.zip
+      sha256: 0b13ab89a64c9918189b1dadd449ef6ed3cb3b7b19cabd96d8adbd95505bb908
+  wine:
+    overrides:
+      ddraw: n
+  installer:
+  - insert-disc:
+      requires: BM95.EXE
+  - task: {name: create_prefix, prefix: $GAMEDIR, arch: win32}
+  # The files Lutris's script copies, plus the disc's own levels.dat (the
+  # same four bytes that script writes). POSIX sh, without bash's braces.
+  - execute:
+      command: |
+        dst="$GAMEDIR/drive_c/INTRPLAY/BOMBRMAN"
+        mkdir -p "$dst"
+        for f in "$DISC"/*; do
+          case $(basename "$f" | tr 'A-Z' 'a-z') in
+          *.rmp|bm95.*|*.pal|*.bm|*.fon|*.txt|makecfg.exe|levels.dat|data|tools)
+            cp -R "$f" "$dst/" ;;
+          esac
+        done
+        chmod -R u+w "$dst"
+  - write_file:
+      file: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/cfg.ini
+      content: |
+        ; created by d:\makecfg.exe
+        hdhome=C:\INTRPLAY\BOMBRMAN
+        cdhome=C:\INTRPLAY\BOMBRMAN
+        ; debug=3debug.log
+        soundonoff=1
+        netonoff=1
+  # The Watcom runtime in BM95.EXE uses instruction forms prospero-win's
+  # i386 translator does not take yet, and the game stops with an illegal
+  # instruction: push/pop fs and gs (0f a0/a1/a8/a9), mov to es and ds (8e),
+  # the FPU probe's push ax and fwait finit, and enter. In this flat program
+  # they are no-ops or have plain equivalents: push/pop es for fs and gs,
+  # nothing for reloading es/ds with the same selector, a probe that reports
+  # a 387, and push ebp/mov ebp,esp/sub esp through a jump into the section's
+  # unused tail. Pinned to the original and the patched file's SHA-256.
+  - execute:
+      command: |
+        python3 - "$GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/BM95.EXE" <<'EOF'
+        import hashlib, struct, sys
+        path = sys.argv[1]
+        b = bytearray(open(path, 'rb').read())
+        if hashlib.sha256(b).hexdigest() != 'd1ff5f6fba03f20b4a161af1c75165b841e536cd9398ed2692202cee6d6b3857':
+            sys.exit('BM95.EXE is not the build this patch is for')
+        off = lambda va: va - 0x401000 + 0x400
+        def put(va, old, new):
+            o = off(va)
+            assert bytes(b[o:o + len(old)]) == old, hex(va)
+            b[o:o + len(new)] = new
+        for va in (0x4521dc, 0x4521de, 0x452234, 0x452236, 0x4529d2, 0x4529d4):
+            put(va, b[off(va):off(va) + 2], {0xa0: b'\x06\x90', 0xa8: b'\x06\x90'}[b[off(va) + 1]])
+        for va in (0x452229, 0x45222b, 0x452ab0, 0x452ab2):
+            put(va, b[off(va):off(va) + 2], {0xa1: b'\x07\x90', 0xa9: b'\x07\x90'}[b[off(va) + 1]])
+        for va in (0x444146, 0x445528, 0x445546, 0x44ad73, 0x44ad93, 0x44b955, 0x44bc86, 0x44bd08,
+                   0x44e4cb, 0x44e4db, 0x44e572, 0x44e582, 0x44e67c, 0x44e68e, 0x44e74b, 0x44e75b,
+                   0x44eaa6, 0x44eaba, 0x44ecbc, 0x44ecd0, 0x450304, 0x45068e, 0x4506b2, 0x4506e6,
+                   0x450841, 0x4509ae, 0x4509c6, 0x450a86, 0x450ac6, 0x45127c, 0x451a41, 0x451bf6,
+                   0x451db2, 0x451dd0, 0x451fcc, 0x452065, 0x452079, 0x45209a, 0x4520b5, 0x452b08,
+                   0x453a3c, 0x453ae4, 0x454996, 0x455c5d, 0x455c72, 0x455c89, 0x455cae, 0x455ccc,
+                   0x455cea, 0x455d19, 0x455d39, 0x455e0d, 0x455e23, 0x455e89, 0x455ec8, 0x456812):
+            assert b[off(va)] == 0x8e and b[off(va) + 1] in (0xc0, 0xc1, 0xc2, 0xda), hex(va)
+            put(va, bytes(b[off(va):off(va) + 2]), b'\x90\x90')
+        # push eax; fninit; fldcw [esp]; pop eax; mov eax, 3; ret
+        put(0x450db6, bytes.fromhex('66509bdbe3'), bytes.fromhex('50dbe3d92c2458b803000000c3'))
+        cave = 0x457e40
+        for site, moved in ((0x4521e0, '89c7'), (0x452238, '50'), (0x45371b, '50'),
+                            (0x454f0e, '89c6'), (0x456179, '50')):
+            moved = bytes.fromhex(moved)
+            frame = struct.unpack_from('<H', b, off(site) + 1)[0]
+            back = site + 4 + len(moved)
+            tramp = b'\x55\x89\xe5\x81\xec' + struct.pack('<I', frame) + moved
+            tramp += b'\xe9' + struct.pack('<i', back - (cave + len(tramp) + 5))
+            put(cave, bytes(len(tramp)), tramp)
+            put(site, b'\xc8' + struct.pack('<H', frame) + b'\x00' + moved,
+                b'\xe9' + struct.pack('<i', cave - (site + 5)) + b'\x90' * (back - site - 5))
+            cave += (len(tramp) + 15) & ~15
+        if hashlib.sha256(b).hexdigest() != 'f6d1bc021c17813ffbb0de8e34094334f81797d2a81f5afe002cffa09a451ec8':
+            sys.exit('the patched BM95.EXE does not match')
+        open(path, 'wb').write(b)
+        EOF
+  - extract: {file: cncddraw, dst: $CACHE/cncddraw}
+  - copy: {src: $CACHE/cncddraw/ddraw.dll, dst: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN}
+  - write_file:
+      file: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/ddraw.ini
+      content: |
+        [ddraw]
+        renderer=gdi
+        fullscreen=true
+
+        ; cnc-ddraw's own setting for Atomic Bomberman
+        [BM]
+        maxgameticks=60
+  # Player 1's keys as DirectInput sees the console's d-pad: the title sends
+  # the arrows without the extended-key flag, so they arrive as the keypad's
+  # 8/6/2/4 (72/77/80/75) rather than the arrow keys (200/205/208/203).
+  # Space and Enter drop a bomb and act. The rest are the game's defaults.
+  - write_file:
+      file: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/options.ini
+      content: |
+        ;Bomberman Options file.
+        levelno=0
+        num_to_win_match=2
+        enclosement_depth=1
+        conveyor_speed=1
+        team_play=0
+        random_start=1
+        stomped_bombs_detonate=1
+        win_by_kills=0
+        goldman=0
+        schemefilename=BASIC.SCH
+        playtime=150
+        assign_keyboards=1
+        diseases_destroyable=1
+        lost_net_revert_ai=0
+        disable_game_music=0
+        modemport=2
+        modembaud=19200
+        modemirq=3
+        modemdial=555-1212
+        netprotocol=0
+        smallmemory=0
+        keydef=0,0,72
+        keydef=0,1,77
+        keydef=0,2,80
+        keydef=0,3,75
+        keydef=0,4,57
+        keydef=0,5,28
+        keydef=0,6,0
+        keydef=0,7,0
+        keydef=0,8,0
+        keydef=0,9,0
+        keydef=1,0,19
+        keydef=1,1,34
+        keydef=1,2,33
+        keydef=1,3,32
+        keydef=1,4,31
+        keydef=1,5,30
+        keydef=1,6,0
+        keydef=1,7,0
+        keydef=1,8,0
+        keydef=1,9,0
