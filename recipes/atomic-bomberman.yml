@@ -5,11 +5,22 @@
 # from there (cfg.ini points both of its homes at it), so the console needs no
 # CD drive, and it writes no registry keys.
 #
-# Give the CD's root as --disc: a mounted disc, or a .bin/.cue image unpacked
-# (bchunk, then 7z x on the .iso). The file names are matched in either case,
-# since a disc mounted without Joliet shows them in lower case. Checked with
-# the Italian "Sold Out Software" CD; the BM95.EXE patch below is pinned to
-# that build and stops on any other.
+# Give the folder that holds BM95.EXE as --disc: the CD's root on the Sold
+# Out CD, its BOMBRMAN folder on CDs that keep the game there (the Lutris
+# script's layout). A mounted disc or a .bin/.cue image unpacked (bchunk,
+# then 7z x on the .iso) both work; the file names are matched in either
+# case, since a disc mounted without Joliet shows them in lower case.
+#
+# Limits for now:
+# - Checked only with the Italian "Sold Out Software" CD. The BM95.EXE patch
+#   below is pinned to that build and stops on any other; it goes away once
+#   prospero-win's translator takes these instruction forms.
+# - options.ini sets player 1's keys for the d-pad as the console sends it
+#   today (see there). Once the title sends the arrows as extended keys, set
+#   them back to the arrows in the game's keyboard definitions.
+# - On a console where another loader already shows /data to every app
+#   (ShadowMountPlus 1.7beta4, PS5SXHelper's mountroot), no game starts
+#   without prospero-win #423.
 name: Atomic Bomberman
 game_slug: atomic-bomberman
 version: CD (Prospero Win)
