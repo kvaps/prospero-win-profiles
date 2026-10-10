@@ -9,18 +9,22 @@ benchmark programs from their pinned upstream sources.
 
 ## Profiles
 
+The benchmark rows (`sevenzip-bench`, `nbench-*`, `pi-*`) have their profiles in
+`benchmarks/profiles/`, outside the launcher's catalog.
+
 | Profile | Program | Architecture | Checked on FW 12.02 |
 |---|---|---|---|
 | `minesweeper` | Wine's Minesweeper (ships with the prefix) | PE64 | Played with the stick-driven pointer |
 | `pinball` | Space Cadet Pinball (your own copy, in `C:\Games\Pinball`) | PE32 | Played full-screen with the DualSense |
 | `warcraft-iii-reign-of-chaos` | Warcraft III: Reign of Chaos 1.27a (your own copy and CD key; installed from `recipes/`) | PE32, Direct3D 9 | 2026-09-29: plays on RADV, DXVK 2.6.2 (menu, skirmish, cinematics with sound, centred); DualSense (`warcraft3` preset) or USB keyboard and mouse; performance not yet measured |
-| `openarena-088` | OpenArena 0.8.8 official Windows build (your copy in `C:\Games\OpenArena`) | PE32, OpenGL | 2026-10-01: `GL_RENDERER: PS5 AGC`, `aggressor` bot match; no GPU present failure or rejected draw; USB keyboard and mouse for input |
-| `half-life` | Half-Life 1 (your own copy in `C:\Games\HalfLife`) | PE32, OpenGL | 2026-10-01: `c1a0` scene and audio on the PS5; USB keyboard and mouse for input |
-| `counter-strike-16` | Counter-Strike 1.6 (your own copy in `C:\Games\CounterStrike16`, plus winetricks `corefonts`; see the profile's comments) | PE32, OpenGL | 2026-10-01: main menu at 1920x1080 with the core fonts, 60 fps with vsync; USB keyboard and mouse |
+| `openarena-088` | OpenArena 0.8.8 official Windows build (your copy in `C:\Games\OpenArena`) | PE32, OpenGL (Zink) | 2026-10-10: the bot match it starts by itself runs at 58.5 fps on average through Zink, no window or device errors; USB keyboard and mouse for input |
+| `half-life` | Half-Life 1 (your own copy in `C:\Games\HalfLife`) | PE32, OpenGL (Zink) | 2026-10-10: menu, cursor and the `c1a0` opening played through Zink with the DualSense, 56.4 fps on average in the scripted scene; USB keyboard and mouse work too |
+| `counter-strike-16` | Counter-Strike 1.6 (your own copy in `C:\Games\CounterStrike16`, plus winetricks `corefonts`; see the profile's comments) | PE32, OpenGL (Zink) | 2026-10-10: menu with the core fonts and de_dust2 with nine bots at 59.9 fps through Zink; DualSense (goldsrc preset) or USB keyboard and mouse |
 | `half-life-2` | Half-Life 2 (your own copy in `C:\Games\HalfLife2` of its own prefix, with DXVK 2.6.2; see the profile's comments) | PE32, Direct3D 9 | 2026-10-02: `d1_trainstation_01` and `d1_canals_01` load in about 25 s and render; a 91 s recorded train-station demo plays at 59.7 fps on average, never under 56; keyboard checked (flashlight, pause menu); needs prospero-win #289 and #296. Mouse and DualSense not yet checked |
 | `gtaiv` | Grand Theft Auto IV: The Complete Edition 1.2.0.59 (your own copy in `C:\Games\GTAIV` of its own prefix, with DXVK 2.6.2; installed from `recipes/`) | PE32, Direct3D 9 | 2026-10: the open city at 1920x1080 and 60 Hz runs at roughly 54–55 fps, close to 59 on quiet streets and in the mid-40s in fights and crowds; about 90–95 s of loading to get into the game; DualSense. FusionFix works as an optional mod (see below) |
-| `gta-san-andreas` | Grand Theft Auto: San Andreas 1.0 (your own copy in `C:\Games\GTASA` of its own prefix, with LAV Filters and mods; installed from `recipes/`). Uses a DXVK build with two San Andreas fixes: a faster small GPU readback for Proper Shaders' sky colour (`d3d9.asyncSmallReadback`, set in `dxvk.conf`) and cheaper 32-bit bookkeeping (DXVK 2.6.2-prospero1 from mpereiraesaa/dxvk) | PE32, Direct3D 9 | 2026-10-05: 60 fps at 1920x1080 in Grove Street and on the road, intro movies with sound, DualSense through GInput; with CLEO 4, Mod Loader and Proper Shaders (preset 0) 59.3 fps average on a Los Santos drive; needs prospero-win #373 and #374, plus #380, #382, #385 and #387 for CLEO, Mod Loader and Proper Shaders |
+| `gta-san-andreas` | Grand Theft Auto: San Andreas 1.0 (your own copy in `C:\Games\GTASA` of its own prefix, with DXVK 2.6.2, LAV Filters and mods; installed from `recipes/`) | PE32, Direct3D 9 | 2026-10-05: 60 fps at 1920x1080 in Grove Street and on the road, intro movies with sound, DualSense through GInput; with CLEO 4, Mod Loader and Proper Shaders (preset 0) 59.3 fps average on a Los Santos drive; needs prospero-win #373 and #374, plus #380, #382, #385 and #387 for CLEO, Mod Loader and Proper Shaders |
 | `atomic-bomberman` | Atomic Bomberman (your own CD, installed from `recipes/` into its own prefix; cnc-ddraw draws the 8-bit DirectDraw frames) | PE32, DirectDraw | 2026-10-07 on FW 13.42: menus, sound and a match with the DualSense (`atomic-bomberman` preset), on the unpatched game; needs prospero-win #425 and #426, and #423 when another loader already shows `/data`; without #428 the game stalls now and then until the next button press |
+| `sdlpop` | Prince of Persia through SDLPoP 1.23 (your own copy in `C:\Games\SDLPoP` of its own prefix; installed from `recipes/`) | PE32 | 2026-10, on FW 10.01 (not 12.02), ShadowMountPlus 1.7beta3: plays with the DualSense (XInput), L3 quicksaves, R3 quickloads and the touchpad shows the time left; software rendering (`gdi`), performance not measured |
 | `sevenzip-bench` | 7-Zip 25.01 benchmark, `7za b -mmt1 -md22` | PE32 | 2026-09-28: 3361–3369 total MIPS |
 | `nbench-x87` | nbench (BYTEmark 2.2.3), x87 build | PE32 | 2026-09-28: all ten tests; integer index 166.7, FP index 81.6 |
 | `pi-x87` | Ooura's `pi_fftca`, 4.2M digits, x87 build | PE32 | 2026-09-28: 13 s, digits written to `pi.dat` |
@@ -39,18 +43,49 @@ the title to the launcher.
 ## Graphics modes
 
 The profile checker accepts `graphics = auto`, `gdi`, `dxvk` or `opengl`.
-`opengl` requires a prospero-win runtime built with the optional PS5 OpenGL
-SDK. The runtime forces Wine's builtin `opengl32` for that profile, preserving
-any other per-game DLL overrides. SDK 0.6.0 provides an EGL compatibility
-profile and OpenGL 4.6 Core; Wine's legacy `wglCreateContext` path uses the
-compatibility default so games can call fixed-function APIs. The upstream
-compatibility-context gate covers legacy `QUADS` and related draws. OpenArena
-0.8.8 and Half-Life 1 have been validated on the PS5; other games and Doom
-ports still need individual checks. Both OpenGL profiles set `show_fps = true`
-for the backend's small frame-rate counter without the statistics chart.
-Half-Life and Counter-Strike also set `opengl_thread = true`, which runs the
-game's OpenGL work on its own CPU core beside the game; it needs a
-prospero-win runtime that knows the setting (older ones refuse the profile).
+`opengl` means Mesa's WGL/Zink: the game's OpenGL calls are translated to
+Vulkan and drawn by the console's Vulkan driver. prospero-win's installer
+puts the Zink DLLs into the game's prefix (`pw_install.py --mesa-zink DIR`,
+see its `docs/INSTALLING_GAMES.md`) and the runtime selects them for that
+profile while keeping any other per-game DLL overrides. The runtime also takes
+`graphics = zink` as an older spelling of the same thing. OpenArena 0.8.8,
+Half-Life 1 and Counter-Strike 1.6 have been played this way on the PS5 (see
+the table); other games and Doom ports still need individual checks. The three
+OpenGL profiles set `show_fps = true` for the small frame-rate counter.
+
+The PS5 OpenGL SDK backend that these games used before October 2026 is gone
+from prospero-win, and with it the `refresh` and `opengl_thread` display
+settings: a current runtime ignores both (it logs
+`PW_WINE64 ignored display refresh=... opengl_thread=...`), so the profiles
+here no longer set them; the output rate is no longer a per-game setting.
+
+## DXVK options we use
+
+TL;DR: a few `dxvk.conf` lines (in the game's folder, or point `DXVK_CONFIG_FILE`
+at a file from a profile's `[debug] env`) smooth Direct3D 9 games on the PS5.
+They need the DXVK build from `github.com/mpereiraesaa/dxvk`, branch
+`prospero/v2.6.2` at `a6f6dcc1` or later; older builds ignore lines they don't
+know. Each was judged by playing on the console (2026-10-10).
+
+| Line | What it does | Where it helped |
+|---|---|---|
+| `d3d9.padVsOutputs = True` | Programmable vertex shaders export zero for the TEXCOORD/FOG outputs they never write, so fixed-function pixel shaders can be fast-linked from precompiled parts instead of compiled in full | GTA SA with Proper Shaders: most of the hitching gone |
+| `dxvk.numCompilerThreads = 4` | More pipeline-compile workers, so a new shader is ready sooner (the compile gate in winevulkan, prospero-win #676, keeps them from blocking the render thread) | GTA SA with Proper Shaders |
+| `d3d9.asyncSmallReadback = True` | A small per-frame GPU readback uses the previous frame's value instead of making DXVK wait for the GPU | GTA SA (the sky colour Proper Shaders reads) |
+| `d3d9.weakRenderTargetFlushHint = True` | A change of render target 0 counts as a weak hint to submit the queued work sooner | GTA IV: looked better |
+
+Also in that build, with no option to set: threads are woken after the queue
+lock is released, a texture bind only dirties its own shader stage, and no-op
+depth-stencil changes are skipped. They lower the cost of DXVK's command
+thread, which sat at 90 to 95% in GTA SA and GTA IV. Available but not used:
+`dxvk.implicitFlushChunkScale` (when DXVK flushes by itself) and
+`dxvk.logFastLinkFailures` (logs what blocked a fast link; handy to see why a
+new game still compiles shaders in full).
+
+To explore a new game: add one line at a time, play the part that hitched, and
+keep only what you can see or measure. A profile can also set
+`thread_scheduling`, `shared_input` and `fast_clock` under `[runtime]`, which
+the GTA profiles use.
 
 ## Install
 
@@ -65,10 +100,14 @@ The library lives in `/data/prospero-win` on the console:
 
 1. Copy `profiles/*.profile` and `input/*.input` there. `profiles.lst` sets
    the launcher's order; if you already have one, add these names to it
-   instead of replacing it.
+   instead of replacing it. The launcher reads at most 16 entries and drops
+   the whole list above that, so `profiles.lst` is kept to games.
 2. For the benchmarks, run `benchmarks/build.sh out` (it needs curl, tar,
    patch, `7z`, `i686-w64-mingw32-gcc` and `x86_64-w64-mingw32-gcc`) and
-   copy everything in `out/` except `.cache` to `prefix/drive_c/Tools`.
+   copy everything in `out/` except `.cache` to `prefix/drive_c/Tools`. Their
+   profiles are in `benchmarks/profiles/` and are not in `profiles.lst`: copy
+   the ones you want to `profiles/` on the console and add them to its list
+   while you run them.
 3. For Pinball, copy your installed game to `prefix/drive_c/Games/Pinball`.
 4. For OpenArena or Half-Life, copy your own Windows game files to
    `prefix/drive_c/Games/OpenArena` or `prefix/drive_c/Games/HalfLife`.
