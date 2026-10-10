@@ -1,0 +1,87 @@
+# Atomic Bomberman (Interplay, 1997) for Prospero Win, in Lutris's installer
+# format. Adapted from the lutris.net "CD" script (atomic-bomberman-cd): the
+# CD's setup program is not run, the game's files are copied from the disc to
+# where it would put them, C:\INTRPLAY\BOMBRMAN. The game reads everything
+# from there (cfg.ini points both of its homes at it), so the console needs no
+# CD drive, and it writes no registry keys.
+#
+# Give the folder that holds BM95.EXE as --disc: the CD's root on the Sold
+# Out CD, its BOMBRMAN folder on CDs that keep the game there (the Lutris
+# script's layout). A mounted disc or a .bin/.cue image unpacked (bchunk,
+# then 7z x on the .iso) both work; the file names are matched in either
+# case, since a disc mounted without Joliet shows them in lower case.
+# Checked with the Italian "Sold Out Software" CD.
+#
+# Needs prospero-win #425 (the Watcom runtime's segment, ENTER and word-stack
+# instructions; without it the game stops with an illegal instruction) and
+# #426 (the d-pad's arrows as the arrow keys DirectInput reads; without it the
+# player stands still in a match). #428 stops stalls that last until the next
+# button press (DirectInput's message wait spinning). On a console where another loader already
+# shows /data to every app (ShadowMountPlus 1.7beta4, PS5SXHelper's
+# mountroot), no game starts without #423.
+name: Atomic Bomberman
+game_slug: atomic-bomberman
+version: CD (Prospero Win)
+slug: atomic-bomberman-prospero-win
+runner: wine
+prospero:
+  name: Atomic Bomberman
+  # 640x480 in 256 colours through DirectDraw, drawn by cnc-ddraw's GDI
+  # renderer (below).
+  graphics: gdi
+  display: {desktop: 640x480, scaling: fit}
+  input: {preset: atomic-bomberman}
+script:
+  game:
+    exe: drive_c/INTRPLAY/BOMBRMAN/BM95.EXE
+    prefix: $GAMEDIR
+  files:
+  # FunkyFr3sh's cnc-ddraw (MIT), a DirectDraw replacement that turns the
+  # game's 8-bit palettised frames into 32-bit ones itself. Through Wine's
+  # own ddraw the console showed the frames with garbage colours (pink
+  # stripes, then black). Downloaded, not shipped, and pinned to the bytes.
+  - cncddraw:
+      url: https://github.com/FunkyFr3sh/cnc-ddraw/releases/download/v7.1.0.0/cnc-ddraw.zip
+      filename: cnc-ddraw-7.1.0.0.zip
+      sha256: 0b13ab89a64c9918189b1dadd449ef6ed3cb3b7b19cabd96d8adbd95505bb908
+  wine:
+    overrides:
+      ddraw: n
+  installer:
+  - insert-disc:
+      requires: BM95.EXE
+  - task: {name: create_prefix, prefix: $GAMEDIR, arch: win32}
+  # The files Lutris's script copies, plus the disc's own levels.dat (the
+  # same four bytes that script writes). POSIX sh, without bash's braces.
+  - execute:
+      command: |
+        dst="$GAMEDIR/drive_c/INTRPLAY/BOMBRMAN"
+        mkdir -p "$dst"
+        for f in "$DISC"/*; do
+          case $(basename "$f" | tr 'A-Z' 'a-z') in
+          *.rmp|bm95.*|*.pal|*.bm|*.fon|*.txt|makecfg.exe|levels.dat|data|tools)
+            cp -R "$f" "$dst/" ;;
+          esac
+        done
+        chmod -R u+w "$dst"
+  - write_file:
+      file: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/cfg.ini
+      content: |
+        ; created by d:\makecfg.exe
+        hdhome=C:\INTRPLAY\BOMBRMAN
+        cdhome=C:\INTRPLAY\BOMBRMAN
+        ; debug=3debug.log
+        soundonoff=1
+        netonoff=1
+  - extract: {file: cncddraw, dst: $CACHE/cncddraw}
+  - copy: {src: $CACHE/cncddraw/ddraw.dll, dst: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN}
+  - write_file:
+      file: $GAMEDIR/drive_c/INTRPLAY/BOMBRMAN/ddraw.ini
+      content: |
+        [ddraw]
+        renderer=gdi
+        fullscreen=true
+
+        ; cnc-ddraw's own setting for Atomic Bomberman
+        [BM]
+        maxgameticks=60
